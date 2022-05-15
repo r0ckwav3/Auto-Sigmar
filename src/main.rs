@@ -1,6 +1,5 @@
-mod game_reader;
+mod screenshot;
 
 fn main() {
-    println!("Hello, world!");
-    game_reader::test();
+    screenshot::test();
 }
