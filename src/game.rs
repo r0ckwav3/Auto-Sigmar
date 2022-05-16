@@ -36,12 +36,26 @@ impl Piece{
             _other => false
         }
     }
+
+    fn tochar(&self) -> String{
+        match self{
+            Piece::Element(Element::Fire) => String::from("F"),
+            Piece::Element(Element::Water) => String::from("W"),
+            Piece::Element(Element::Earth) => String::from("E"),
+            Piece::Element(Element::Air) => String::from("A"),
+            Piece::Salt => String::from("S"),
+            Piece::Metal(x) => format!("{}", x),
+            Piece::Quicksilver => String::from("Q"),
+            Piece::Vitae => String::from("V"),
+            Piece::Mors => String::from("M"),
+        }
+    }
 }
 
 // the hexagonal board of sidelength 6 is represented as an 11x11 array.
 // visualize it as taking the square and sorta moving the top edge to the right.
 // the board is accessed using board[x][y] from the bottom left
-struct GameState{
+pub struct GameState{
     board: [[Option<Piece>; 11]; 11],
     metals_taken: u8
 }
@@ -52,6 +66,10 @@ impl GameState{
             board: [[None; 11]; 11], // depending on how this works, the rows may be pointers to the same mem address
             metals_taken: 0u8
         }
+    }
+
+    pub fn on_board(xi: usize, yi: usize) -> bool{
+        (xi+yi >= 5) && (xi+yi <= 15)
     }
 
     pub fn get_piece(&self, x: usize, y: usize) -> Option<&Piece>{
@@ -68,6 +86,21 @@ impl GameState{
         }else{
             self.board[x][y] = piece;
             Ok(self.board[x][y].as_ref())
+        }
+    }
+
+    pub fn print(& self){
+        for y in (0..11).rev(){
+            for _ in 0..y{
+                print!(" ");
+            }
+            for x in (0..11){
+                print!("{} ", match self.get_piece(x, y){
+                    Some(e) => e.tochar(),
+                    None => String::from(" "),
+                });
+            }
+            println!("");
         }
     }
 }

@@ -3,6 +3,7 @@ use image;
 use image::DynamicImage;
 use image::GenericImage;
 use image::GenericImageView;
+use image::Pixel;
 
 use super::screenshot;
 use super::game;
@@ -41,11 +42,6 @@ fn get_screen_coords_center(xi: usize, yi: usize) -> (u32, u32){
     pos
 }
 
-// returns if the given position is on the board
-fn on_board(xi: usize, yi: usize) -> bool{
-    (xi+yi >= 5) && (xi+yi <= 15)
-}
-
 
 
 pub fn test(){
@@ -62,9 +58,10 @@ pub fn test(){
     ];
 
     let mut im = image::open("images/Game1.png").unwrap();
+    let mut gs = game::GameState::new();
     for xi in 0..11{
         for yi in 0..11{
-            if on_board(xi, yi){
+            if game::GameState::on_board(xi, yi){
                 let (x, y) = get_screen_coords(xi, yi);
                 let mut best_diff: f64 = -1.0;
                 let mut piece_guess = &None;
@@ -84,7 +81,18 @@ pub fn test(){
                     }
                 }
 
-                println!("{:?}: {:?} , {:?}", (xi, yi), piece_guess, best_diff);
+                let mc_subim = image_manipulation::max_contrast_grayscale(&im.crop_imm(x, y, 52, 52));
+                for dx in 0..52{
+                    for dy in 0..52{
+                        im.put_pixel(x+dx, y+dy, mc_subim.get_pixel(dx, dy));
+                    }
+                }
+
+                // println!("{:?}: {:?} , {:?}", (xi, yi), piece_guess, best_diff);
+                match gs.set_piece(*piece_guess, xi as usize, yi as usize)  {
+                    Ok(_) => (),
+                    Err(message) => panic!("{}", message)
+                };
                 // if !colorcount.contains_key(&color){
                 //     colorcount.insert(color, Vec::<(usize, usize)>::new());
                 // }
@@ -96,16 +104,23 @@ pub fn test(){
         }
     }
 
+    gs.print();
+
     // for (color, coords) in &colorcount {
     //     println!("{:?}: {:?}", color, coords);
     // }
+
+    match im.save("images/game_reader_test_2.png"){
+        Ok(_) => println!("image saved!"),
+        Err(_) => println!("screenshot failed to save!"),
+    };
 }
 
 pub fn oldtest(){
     let mut im = image::open("images/Game1.png").unwrap();
     for xi in 0..11{
         for yi in 0..11{
-            if on_board(xi, yi){
+            if game::GameState::on_board(xi, yi){
                 let (x, y) = get_screen_coords(xi, yi);
                 im.put_pixel(x, y, image::Rgba::<u8>([0, 255, 0, 255]));
 
