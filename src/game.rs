@@ -93,5 +93,10 @@ pub fn test(){
         assert!(gs.set_peice(a, 11, 11).is_err());
         assert!(gs.set_peice(a, 5, 6).is_ok());
         assert!(gs.get_peice(5, 6).is_some());
+        if let Piece::Element(e) = gs.get_peice(5, 6).unwrap(){
+            assert!(e == &Element::Fire);
+        }else{
+            panic!("expected piece of type 'Element'");
+        }
     }
 }
