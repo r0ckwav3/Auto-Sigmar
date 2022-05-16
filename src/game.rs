@@ -38,11 +38,6 @@ impl Piece{
     }
 }
 
-pub enum placeError{
-    OutOfBounds(String),
-    OverlappingPiece(String)
-}
-
 // the hexagonal board of sidelength 6 is represented as an 11x11 array.
 // visualize it as taking the square and sorta moving the top edge to the right.
 // the board is accessed using board[x][y] from the bottom left
@@ -66,19 +61,37 @@ impl GameState{
             self.board[x][y].as_ref()
         }
     }
+
+    pub fn set_peice(&mut self, piece: Option<Piece>, x: usize, y: usize) -> Result<Option<&Piece>, String>{
+        if x >= 11 || y >= 11{
+            Err(String::from("Attempted to place piece out of bounds"))
+        }else{
+            self.board[x][y] = piece;
+            Ok(self.board[x][y].as_ref())
+        }
+    }
 }
 
 pub fn test(){
-    let a = Piece::Element(Element::Fire);
-    let b = Piece::Element(Element::Water);
-    let c = Piece::Salt;
-    let d = Piece::Quicksilver;
+    {
+        let a = Piece::Element(Element::Fire);
+        let b = Piece::Element(Element::Water);
+        let c = Piece::Salt;
+        let d = Piece::Quicksilver;
 
-    assert!(a.legal_pair(&a));
-    assert!(a.legal_pair(&c));
-    assert!(c.legal_pair(&a));
+        assert!(a.legal_pair(&a));
+        assert!(a.legal_pair(&c));
+        assert!(c.legal_pair(&a));
 
-    assert!(!a.legal_pair(&b));
-    assert!(!c.legal_pair(&d));
-    assert!(!d.legal_pair(&d));
+        assert!(!a.legal_pair(&b));
+        assert!(!c.legal_pair(&d));
+        assert!(!d.legal_pair(&d));
+    }
+    {
+        let mut gs = GameState::new();
+        let a = Some(Piece::Element(Element::Fire));
+        assert!(gs.set_peice(a, 11, 11).is_err());
+        assert!(gs.set_peice(a, 5, 6).is_ok());
+        assert!(gs.get_peice(5, 6).is_some());
+    }
 }
