@@ -17,9 +17,11 @@ pub fn test(){
     }
 
     let im = get_screen_image();
-    im.save("test.png").unwrap();
+    match im.save("screenshot_test.png"){
+        Ok(_) => println!("screenshot taken!"),
+        Err(_) => println!("screenshot failed to save!"),
+    };
 
-    println!("screenshot taken!")
 }
 
 pub fn get_screen_image() -> DynamicImage{
