@@ -94,7 +94,7 @@ impl GameState{
             for _ in 0..y{
                 print!(" ");
             }
-            for x in (0..11){
+            for x in 0..11{
                 print!("{} ", match self.get_piece(x, y){
                     Some(e) => e.tochar(),
                     None => String::from(" "),

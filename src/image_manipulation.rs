@@ -12,7 +12,6 @@ pub fn image_diff(im1: &DynamicImage, im2: &DynamicImage) -> Result<f64, String>
     if im1.width() != im2.width() || im1.height() != im2.height(){
         Err(String::from("image inputs have different dimensions"))
     }else{
-        let (w, h) = (im1.width(), im1.height());
         let im1 = im1.to_rgb8();
         let im1data = im1.as_raw();
         let im2 = im2.to_rgb8();
@@ -31,7 +30,6 @@ pub fn image_diff_normalized(im1: &DynamicImage, im2: &DynamicImage) -> Result<f
     if im1.width() != im2.width() || im1.height() != im2.height(){
         Err(String::from("image inputs have different dimensions"))
     }else{
-        let (w, h) = (im1.width(), im1.height());
         let im1 = im1.to_rgb8();
         let im1data = im1.as_raw();
         let im1ave = im1data.iter()
@@ -64,13 +62,53 @@ pub fn image_diff_normalized(im1: &DynamicImage, im2: &DynamicImage) -> Result<f
     }
 }
 
+// returns the average difference of coordinates in RGB after norming both images
+// also squares differences
+// may break on particularly large images
+pub fn image_diff_normalized_squared(im1: &DynamicImage, im2: &DynamicImage) -> Result<f64, String>{
+    if im1.width() != im2.width() || im1.height() != im2.height(){
+        Err(String::from("image inputs have different dimensions"))
+    }else{
+        let im1 = im1.to_rgb8();
+        let im1data = im1.as_raw();
+        let im1ave = im1data.iter()
+            .fold(0.0, |a, b| a+&(*b as f64))
+            /(im1data.len() as f64);
+        let im1sd = (im1data.iter()
+            .fold(0.0, |a, b| {
+                let d = im1ave - (*b as f64);
+                a + (d*d)
+            })/(im1data.len() as f64))
+            .sqrt();
+
+        let im2 = im2.to_rgb8();
+        let im2data = im2.as_raw();
+        let im2ave = im2data.iter()
+            .fold(0.0, |a, b| a+&(*b as f64))
+            /(im2data.len() as f64);
+        let im2sd = (im2data.iter()
+            .fold(0.0, |a, b| {
+                let d = im2ave - (*b as f64);
+                a + (d*d)
+            })/(im2data.len() as f64))
+            .sqrt();
+
+        let mut accum: f64 = 0.0;
+        for i in 0..im1data.len(){
+            let diff = (((im1data[i] as f64) - im1ave)/im1sd - ((im2data[i] as f64) - im2ave)/im2sd).abs();
+            accum += diff*diff;
+        }
+        Ok(accum/(im1data.len() as f64))
+    }
+}
+
+
 // only compares whether a pixel is greater than average or less than average
 // may break on particularly large images
 pub fn image_diff_highlights(im1: &DynamicImage, im2: &DynamicImage) -> Result<f64, String>{
     if im1.width() != im2.width() || im1.height() != im2.height(){
         Err(String::from("image inputs have different dimensions"))
     }else{
-        let (w, h) = (im1.width(), im1.height());
         let im1 = im1.to_luma8();
         let im1data = im1.as_raw();
         let im1ave = im1data.iter()
@@ -132,7 +170,7 @@ pub fn max_contrast(im: &DynamicImage) -> DynamicImage{
 
     for x in 0..w{
         for y in 0..h{
-            let px = (im.get_pixel(x, y).0);
+            let px = im.get_pixel(x, y).0;
             for i in 0..3{
                 imave[i] += px[i] as f64;
             }
@@ -146,7 +184,7 @@ pub fn max_contrast(im: &DynamicImage) -> DynamicImage{
     let mut imsd = [0.0; 3];
     for x in 0..w{
         for y in 0..h{
-            let px = (im.get_pixel(x, y).0);
+            let px = im.get_pixel(x, y).0;
             let diff = [
                 imave[0] - (px[0] as f64),
                 imave[1] - (px[1] as f64),
@@ -174,7 +212,7 @@ pub fn max_contrast(im: &DynamicImage) -> DynamicImage{
             let mut color = [0, 0, 0];
             let px = im.get_pixel(x, y).0;
             for i in 0..3{
-                if(px[i] as f64 > cutoff[i]){
+                if px[i] as f64 > cutoff[i]{
                     color[i] = 255;
                 }else{
                     color[i] = 0;
@@ -208,7 +246,7 @@ pub fn max_contrast_grayscale(im: &DynamicImage) -> DynamicImage{
 
     for x in 0..w{
         for y in 0..h{
-            if((im.get_pixel(x, y).0)[0] as f64 > cutoff){
+            if(im.get_pixel(x, y).0)[0] as f64 > cutoff{
                 imout.put_pixel(x, y, image::Luma([255]));
             }else{
                 imout.put_pixel(x, y, image::Luma([0]));

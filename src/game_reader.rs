@@ -1,9 +1,8 @@
-use std::vec::Vec;
 use image;
-use image::DynamicImage;
+// use image::DynamicImage;
 use image::GenericImage;
 use image::GenericImageView;
-use image::Pixel;
+// use image::Pixel;
 
 use super::screenshot;
 use super::game;
