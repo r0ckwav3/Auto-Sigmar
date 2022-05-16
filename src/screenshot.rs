@@ -17,7 +17,7 @@ pub fn test(){
     }
 
     let im = get_screen_image();
-    match im.save("screenshot_test.png"){
+    match im.save("images/screenshot_test.png"){
         Ok(_) => println!("screenshot taken!"),
         Err(_) => println!("screenshot failed to save!"),
     };
