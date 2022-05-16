@@ -1,5 +1,5 @@
 // structs and enums to represent game state
-#[derive(PartialEq, Copy, Clone)]
+#[derive(PartialEq, Copy, Clone, Debug)]
 pub enum Element{
     Water,
     Fire,
@@ -7,7 +7,7 @@ pub enum Element{
     Air
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum Piece{
     Element(Element),
     Salt,
@@ -54,7 +54,7 @@ impl GameState{
         }
     }
 
-    pub fn get_peice(&self, x: usize, y: usize) -> Option<&Piece>{
+    pub fn get_piece(&self, x: usize, y: usize) -> Option<&Piece>{
         if x >= 11 || y >= 11{
             None
         }else{
@@ -62,7 +62,7 @@ impl GameState{
         }
     }
 
-    pub fn set_peice(&mut self, piece: Option<Piece>, x: usize, y: usize) -> Result<Option<&Piece>, String>{
+    pub fn set_piece(&mut self, piece: Option<Piece>, x: usize, y: usize) -> Result<Option<&Piece>, String>{
         if x >= 11 || y >= 11{
             Err(String::from("Attempted to place piece out of bounds"))
         }else{
@@ -90,10 +90,10 @@ pub fn test(){
     {
         let mut gs = GameState::new();
         let a = Some(Piece::Element(Element::Fire));
-        assert!(gs.set_peice(a, 11, 11).is_err());
-        assert!(gs.set_peice(a, 5, 6).is_ok());
-        assert!(gs.get_peice(5, 6).is_some());
-        if let Piece::Element(e) = gs.get_peice(5, 6).unwrap(){
+        assert!(gs.set_piece(a, 11, 11).is_err());
+        assert!(gs.set_piece(a, 5, 6).is_ok());
+        assert!(gs.get_piece(5, 6).is_some());
+        if let Piece::Element(e) = gs.get_piece(5, 6).unwrap(){
             assert!(e == &Element::Fire);
         }else{
             panic!("expected piece of type 'Element'");
