@@ -1,4 +1,3 @@
-use std::collections::hash_map::HashMap;
 use std::vec::Vec;
 use image;
 use image::DynamicImage;
@@ -7,6 +6,7 @@ use image::GenericImageView;
 
 use super::screenshot;
 use super::game;
+use super::image_manipulation;
 
 // In 1440x900 resolution, each marble is 52 pixels by 52 pixels
 // the horizontal offset in a row is 66
@@ -49,35 +49,56 @@ fn on_board(xi: usize, yi: usize) -> bool{
 
 
 pub fn test(){
-    // let piececolors = HashMap::from([
-    //     (game::Piece::Element(game::Element::Fire), []),
-    //     ("Venus", 0.7),
-    //     ("Earth", 1.0),
-    //     ("Mars", 1.5),
-    // ]);
+    let piece_images = [
+        (Some(game::Piece::Element(game::Element::Fire)), image::open("images/Pieces/Fire.png").unwrap()),
+        (Some(game::Piece::Element(game::Element::Water)), image::open("images/Pieces/Water.png").unwrap()),
+        (Some(game::Piece::Element(game::Element::Earth)), image::open("images/Pieces/Earth.png").unwrap()),
+        (Some(game::Piece::Element(game::Element::Air)), image::open("images/Pieces/Air.png").unwrap()),
+        (Some(game::Piece::Salt), image::open("images/Pieces/Salt.png").unwrap()),
+        (Some(game::Piece::Quicksilver), image::open("images/Pieces/Quicksilver.png").unwrap()),
+        (Some(game::Piece::Vitae), image::open("images/Pieces/Vitae.png").unwrap()),
+        (Some(game::Piece::Mors), image::open("images/Pieces/Mors.png").unwrap()),
+        (None, image::open("images/Pieces/Empty.png").unwrap())
+    ];
 
     let mut im = image::open("images/Game1.png").unwrap();
-    let mut colorcount: HashMap<[u8; 4], Vec<(usize, usize)>> = HashMap::new();
     for xi in 0..11{
         for yi in 0..11{
             if on_board(xi, yi){
-                let (x, y) = get_screen_coords_center(xi, yi);
-                let color = im.get_pixel(x, y).0;
-                // println!("{:?}: {:?}", (xi, yi), color);
-                if !colorcount.contains_key(&color){
-                    colorcount.insert(color, Vec::<(usize, usize)>::new());
+                let (x, y) = get_screen_coords(xi, yi);
+                let mut best_diff: f64 = -1.0;
+                let mut piece_guess = &None;
+                for (piece, piece_im) in &piece_images{
+                    let imdiff = image_manipulation::image_diff_normalized(&piece_im, &im.crop_imm(x, y, 52, 52));
+                    let imdiff = match imdiff {
+                        Ok(x) => x,
+                        Err(s) => {
+                            println!("{}", s);
+                            best_diff
+                        }
+                    };
+
+                    if imdiff < best_diff || best_diff == -1.0{
+                        best_diff = imdiff;
+                        piece_guess = piece;
+                    }
                 }
-                match colorcount.get_mut(&color){
-                    Some(v) => v.push((xi, yi)),
-                    None => (),
-                }
+
+                println!("{:?}: {:?} , {:?}", (xi, yi), piece_guess, best_diff);
+                // if !colorcount.contains_key(&color){
+                //     colorcount.insert(color, Vec::<(usize, usize)>::new());
+                // }
+                // match colorcount.get_mut(&colordiff){
+                //     Some(v) => v.push((xi, yi)),
+                //     None => (),
+                // }
             }
         }
     }
 
-    for (color, coords) in &colorcount {
-        println!("{:?}: {:?}", color, coords);
-    }
+    // for (color, coords) in &colorcount {
+    //     println!("{:?}: {:?}", color, coords);
+    // }
 }
 
 pub fn oldtest(){
