@@ -1,5 +1,8 @@
 mod screenshot;
+mod game;
 
 fn main() {
-    screenshot::test();
+    game::test();
+    // screenshot::test();
+    
 }
