@@ -1,5 +1,5 @@
 use image;
-// use image::DynamicImage;
+use image::DynamicImage;
 use image::GenericImage;
 use image::GenericImageView;
 // use image::Pixel;
@@ -41,23 +41,27 @@ fn get_screen_coords_center(xi: usize, yi: usize) -> (u32, u32){
     pos
 }
 
-
-
-pub fn test(){
+pub fn read_board(im: &DynamicImage) -> game::GameState{
     let piece_images = [
         (Some(game::Piece::Element(game::Element::Fire)), image::open("images/Pieces/Fire.png").unwrap()),
         (Some(game::Piece::Element(game::Element::Water)), image::open("images/Pieces/Water.png").unwrap()),
         (Some(game::Piece::Element(game::Element::Earth)), image::open("images/Pieces/Earth.png").unwrap()),
         (Some(game::Piece::Element(game::Element::Air)), image::open("images/Pieces/Air.png").unwrap()),
         (Some(game::Piece::Salt), image::open("images/Pieces/Salt.png").unwrap()),
+        (Some(game::Piece::Metal(0)), image::open("images/Pieces/Metal1.png").unwrap()),
+        (Some(game::Piece::Metal(1)), image::open("images/Pieces/Metal2.png").unwrap()),
+        (Some(game::Piece::Metal(2)), image::open("images/Pieces/Metal3.png").unwrap()),
+        (Some(game::Piece::Metal(3)), image::open("images/Pieces/Metal4.png").unwrap()),
+        (Some(game::Piece::Metal(4)), image::open("images/Pieces/Metal5.png").unwrap()),
+        (Some(game::Piece::Metal(5)), image::open("images/Pieces/Metal6.png").unwrap()),
         (Some(game::Piece::Quicksilver), image::open("images/Pieces/Quicksilver.png").unwrap()),
         (Some(game::Piece::Vitae), image::open("images/Pieces/Vitae.png").unwrap()),
         (Some(game::Piece::Mors), image::open("images/Pieces/Mors.png").unwrap()),
         (None, image::open("images/Pieces/Empty.png").unwrap())
     ];
 
-    let mut im = image::open("images/Game1.png").unwrap();
     let mut gs = game::GameState::new();
+
     for xi in 0..11{
         for yi in 0..11{
             if game::GameState::on_board(xi, yi){
@@ -80,39 +84,23 @@ pub fn test(){
                     }
                 }
 
-                let mc_subim = image_manipulation::max_contrast_grayscale(&im.crop_imm(x, y, 52, 52));
-                for dx in 0..52{
-                    for dy in 0..52{
-                        im.put_pixel(x+dx, y+dy, mc_subim.get_pixel(dx, dy));
-                    }
-                }
-
                 // println!("{:?}: {:?} , {:?}", (xi, yi), piece_guess, best_diff);
                 match gs.set_piece(*piece_guess, xi as usize, yi as usize)  {
                     Ok(_) => (),
                     Err(message) => panic!("{}", message)
                 };
-                // if !colorcount.contains_key(&color){
-                //     colorcount.insert(color, Vec::<(usize, usize)>::new());
-                // }
-                // match colorcount.get_mut(&colordiff){
-                //     Some(v) => v.push((xi, yi)),
-                //     None => (),
-                // }
             }
         }
     }
 
+    gs
+}
+
+
+pub fn test(){
+    let mut im = image::open("images/Game1.png").unwrap();
+    let gs = read_board(&im);
     gs.print();
-
-    // for (color, coords) in &colorcount {
-    //     println!("{:?}: {:?}", color, coords);
-    // }
-
-    match im.save("images/game_reader_test_2.png"){
-        Ok(_) => println!("image saved!"),
-        Err(_) => println!("screenshot failed to save!"),
-    };
 }
 
 pub fn oldtest(){
@@ -129,6 +117,26 @@ pub fn oldtest(){
         }
     }
     match im.save("images/game_reader_test.png"){
+        Ok(_) => println!("image saved!"),
+        Err(_) => println!("screenshot failed to save!"),
+    };
+
+    let mut im = image::open("images/Game1.png").unwrap();
+    for xi in 0..11{
+        for yi in 0..11{
+            if game::GameState::on_board(xi, yi){
+                let (x, y) = get_screen_coords(xi, yi);
+
+                let mc_subim = image_manipulation::max_contrast_grayscale(&im.crop_imm(x, y, 52, 52));
+                for dx in 0..52{
+                    for dy in 0..52{
+                        im.put_pixel(x+dx, y+dy, mc_subim.get_pixel(dx, dy));
+                    }
+                }
+            }
+        }
+    }
+    match im.save("images/game_reader_test_2.png"){
         Ok(_) => println!("image saved!"),
         Err(_) => println!("screenshot failed to save!"),
     };

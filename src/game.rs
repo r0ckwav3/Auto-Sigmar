@@ -68,6 +68,14 @@ impl GameState{
         }
     }
 
+    // same as Game1.png
+    pub fn example() -> GameState{
+        GameState{
+            board: [[None, None, None, None, None, Some(Piece::Element(Element::Air)), None, None, None, None, Some(Piece::Element(Element::Water))], [None, None, None, None, None, Some(Piece::Element(Element::Earth)), Some(Piece::Mors), Some(Piece::Salt), Some(Piece::Metal(4)), Some(Piece::Element(Element::Fire)), None], [None, None, None, None, Some(Piece::Element(Element::Water)), Some(Piece::Vitae), Some(Piece::Element(Element::Air)), None, Some(Piece::Quicksilver), Some(Piece::Metal(3)), None], [None, None, None, Some(Piece::Vitae), None, Some(Piece::Element(Element::Fire)), Some(Piece::Element(Element::Fire)), Some(Piece::Element(Element::Earth)), Some(Piece::Metal(1)), Some(Piece::Metal(2)), None], [None, None, Some(Piece::Mors), Some(Piece::Element(Element::Air)), Some(Piece::Element(Element::Air)), None, None, Some(Piece::Element(Element::Fire)), None, Some(Piece::Element(Element::Fire)), None], [Some(Piece::Element(Element::Earth)), Some(Piece::Element(Element::Earth)), Some(Piece::Element(Element::Earth)), Some(Piece::Element(Element::Earth)), None, Some(Piece::Metal(5)), None, Some(Piece::Salt), Some(Piece::Element(Element::Water)), Some(Piece::Metal(0)), Some(Piece::Element(Element::Fire))], [None, Some(Piece::Vitae), None, Some(Piece::Salt), None, None, Some(Piece::Element(Element::Earth)), Some(Piece::Element(Element::Air)), Some(Piece::Mors), None, None], [None, Some(Piece::Quicksilver), Some(Piece::Element(Element::Earth)), Some(Piece::Element(Element::Water)), Some(Piece::Element(Element::Water)), Some(Piece::Element(Element::Air)), None, Some(Piece::Element(Element::Water)), None, None, None], [None, Some(Piece::Element(Element::Water)), Some(Piece::Element(Element::Fire)), None, Some(Piece::Quicksilver), Some(Piece::Mors), Some(Piece::Element(Element::Water)), None, None, None, None], [None, Some(Piece::Quicksilver), Some(Piece::Vitae), Some(Piece::Element(Element::Fire)), Some(Piece::Salt), Some(Piece::Quicksilver), None, None, None, None, None], [Some(Piece::Element(Element::Air)), None, None, None, None, Some(Piece::Element(Element::Air)), None, None, None, None, None]],
+            metals_taken: 0u8,
+        }
+    }
+
     pub fn on_board(xi: usize, yi: usize) -> bool{
         (xi+yi >= 5) && (xi+yi <= 15)
     }
@@ -90,6 +98,8 @@ impl GameState{
     }
 
     pub fn print(& self){
+        // println!("{:?}", self.board);
+
         for y in (0..11).rev(){
             for _ in 0..y{
                 print!(" ");
