@@ -76,8 +76,8 @@ impl GameState{
         }
     }
 
-    pub fn on_board(xi: usize, yi: usize) -> bool{
-        (xi+yi >= 5) && (xi+yi <= 15)
+    pub fn on_board(x: usize, y: usize) -> bool{
+        (x+y >= 5) && (x+y <= 15) && (x<11) && (y<11)
     }
 
     pub fn get_piece(&self, x: usize, y: usize) -> Option<&Piece>{
@@ -94,6 +94,47 @@ impl GameState{
         }else{
             self.board[x][y] = piece;
             Ok(self.board[x][y].as_ref())
+        }
+    }
+
+    pub fn open_pieces(&mut self) -> Vec<(usize, usize)>{
+        let mut ans = Vec::new();
+        for x in 0..11{
+            for y in 0..11{
+                if self.board[x][y].is_some(){
+                    if self.is_open(x, y){
+                        ans.push((x, y));
+                    }
+                }
+            }
+        }
+
+        ans
+    }
+
+    pub fn is_open(&mut self, x: usize, y: usize) -> bool{
+        if GameState::on_board(x, y){
+            let mut neighbors = [false; 6];
+            for (i, d) in [(1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1), (0, 1)].iter().enumerate(){
+                let (xnew, ynew) = ((x as i32 + d.0) as usize,
+                                    (y as i32 + d.1) as usize);
+                if GameState::on_board(xnew, ynew){
+                    if self.board[xnew][ynew].is_some(){
+                        neighbors[i] = true;
+                    }
+                }
+            }
+
+            let mut isgood = false;
+            for i in 0..6{
+                if !neighbors[i] && !neighbors[(i+1) % 6] && !neighbors[(i+2) % 6]{
+                    isgood = true;
+                }
+            }
+
+            isgood
+        }else{
+            false
         }
     }
 
@@ -134,12 +175,31 @@ pub fn test(){
         let mut gs = GameState::new();
         let a = Some(Piece::Element(Element::Fire));
         assert!(gs.set_piece(a, 11, 11).is_err());
-        assert!(gs.set_piece(a, 5, 6).is_ok());
-        assert!(gs.get_piece(5, 6).is_some());
-        if let Piece::Element(e) = gs.get_piece(5, 6).unwrap(){
+        assert!(gs.set_piece(a, 5, 5).is_ok());
+        assert!(gs.get_piece(5, 5).is_some());
+        if let Piece::Element(e) = gs.get_piece(5, 5).unwrap(){
             assert!(e == &Element::Fire);
         }else{
             panic!("expected piece of type 'Element'");
         }
+
+        // makes a circle in the middle
+        gs.set_piece(Some(Piece::Salt), 6, 5).expect("Failed to place piece.");
+        gs.set_piece(Some(Piece::Salt), 4, 5).expect("Failed to place piece.");
+        gs.set_piece(Some(Piece::Salt), 5, 6).expect("Failed to place piece.");
+        gs.set_piece(Some(Piece::Salt), 5, 4).expect("Failed to place piece.");
+        gs.set_piece(Some(Piece::Salt), 6, 4).expect("Failed to place piece.");
+        gs.set_piece(Some(Piece::Salt), 4, 6).expect("Failed to place piece.");
+
+        assert!(gs.is_open(6, 5));
+        assert!(gs.is_open(4, 5));
+        assert!(gs.is_open(5, 6));
+        assert!(gs.is_open(5, 4));
+        assert!(gs.is_open(6, 4));
+        assert!(gs.is_open(4, 6));
+
+        gs.set_piece(Some(Piece::Metal(5)), 5, 7).expect("Failed to place piece.");
+        assert!(!gs.is_open(5, 5));
+        assert!(!gs.is_open(5, 6));
     }
 }
