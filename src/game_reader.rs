@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+use std::collections::HashMap;
 use image;
 use image::DynamicImage;
 use image::GenericImage;
@@ -61,44 +63,79 @@ pub fn read_board(im: &DynamicImage) -> game::GameState{
     ];
 
     let mut gs = game::GameState::new();
+    let mut candidates = Vec::new();
 
     for xi in 0..11{
         for yi in 0..11{
             if game::GameState::on_board(xi, yi){
                 let (x, y) = get_screen_coords(xi, yi);
-                let mut best_diff: f64 = -1.0;
-                let mut piece_guess = &None;
                 for (piece, piece_im) in &piece_images{
-                    let imdiff = image_manipulation::image_diff_normalized(&piece_im, &im.crop_imm(x, y, 52, 52));
+                    let imdiff = image_manipulation::image_diff_normalized_middle(&piece_im, &im.crop_imm(x, y, 52, 52));
                     let imdiff = match imdiff {
                         Ok(x) => x,
                         Err(s) => {
-                            println!("{}", s);
-                            best_diff
+                            println!("imdiff Error: {}", s);
+                            0.0
                         }
                     };
 
-                    if imdiff < best_diff || best_diff == -1.0{
-                        best_diff = imdiff;
-                        piece_guess = piece;
-                    }
+                    candidates.push((imdiff, piece, xi, yi))
+                }
+            }
+        }
+    }
+
+    let mut pieces_left = HashMap::from([
+        (game::Piece::Element(game::Element::Fire), 8),
+        (game::Piece::Element(game::Element::Water), 8),
+        (game::Piece::Element(game::Element::Earth), 8),
+        (game::Piece::Element(game::Element::Air), 8),
+        (game::Piece::Salt, 4),
+        (game::Piece::Metal(0), 1),
+        (game::Piece::Metal(1), 1),
+        (game::Piece::Metal(2), 1),
+        (game::Piece::Metal(3), 1),
+        (game::Piece::Metal(4), 1),
+        (game::Piece::Metal(5), 1),
+        (game::Piece::Quicksilver, 5),
+        (game::Piece::Vitae, 4),
+        (game::Piece::Mors, 4),
+    ]);
+
+    // candidates.sort_by_key(|a| a.0);
+    candidates.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+    let mut placed_pieces = HashSet::new();
+
+    for c in candidates {
+        let (imdiff, piece, xi, yi) = c;
+        if !placed_pieces.contains(&(xi, yi)) {
+            let availible = match piece {
+                Some(p) => *pieces_left.entry(*p).or_insert(0) > 0,
+                None => true,
+            };
+            if availible {
+                // println!("{:?}: {:?} , {:?}", (xi, yi), piece, imdiff);
+                placed_pieces.insert((xi, yi));
+                if let Some(p) = piece{
+                    *pieces_left.entry(*p).or_insert(0) -= 1;
                 }
 
-                // println!("{:?}: {:?} , {:?}", (xi, yi), piece_guess, best_diff);
-                match gs.set_piece(*piece_guess, xi as usize, yi as usize)  {
+                match gs.set_piece(*piece, xi as usize, yi as usize) {
                     Ok(_) => (),
                     Err(message) => panic!("{}", message)
                 };
             }
         }
+
     }
+
 
     gs
 }
 
 
 pub fn test(){
-    let mut im = image::open("images/Game1.png").unwrap();
+    let im = image::open("images/Game1.png").unwrap();
     let gs = read_board(&im);
     gs.print();
 }

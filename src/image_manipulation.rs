@@ -62,6 +62,18 @@ pub fn image_diff_normalized(im1: &DynamicImage, im2: &DynamicImage) -> Result<f
     }
 }
 
+// only compares the middle square
+pub fn image_diff_normalized_middle(im1: &DynamicImage, im2: &DynamicImage) -> Result<f64, String>{
+    if im1.width() != im2.width() || im1.height() != im2.height(){
+        Err(String::from("image inputs have different dimensions"))
+    }else{
+        let (w, h) = (im1.width(), im1.height());
+        image_diff_normalized(
+            &im1.crop_imm(w/4, h/4, w/2, h/2),
+            &im2.crop_imm(w/4, h/4, w/2, h/2))
+    }
+}
+
 // returns the average difference of coordinates in RGB after norming both images
 // also squares differences
 // may break on particularly large images
