@@ -1,10 +1,18 @@
 use std::collections::HashSet;
 use std::collections::HashMap;
+use std::thread;
+use std::time;
+
 use image;
 use image::DynamicImage;
 use image::GenericImage;
 use image::GenericImageView;
 // use image::Pixel;
+
+use enigo;
+use enigo::Enigo;
+use enigo::MouseControllable;
+use enigo::MouseButton;
 
 use super::screenshot;
 use super::game;
@@ -133,11 +141,35 @@ pub fn read_board(im: &DynamicImage) -> game::GameState{
     gs
 }
 
+pub fn click_peice(xi: usize, yi: usize, enigo: &mut Enigo){
+    let (x, y) = get_screen_coords(xi, yi);
+    enigo.mouse_move_to(x as i32, y as i32);
+    thread::sleep(time::Duration::from_millis(100));
+    enigo.mouse_click(MouseButton::Left);
+}
+
 
 pub fn test(){
-    let im = image::open("images/Game1.png").unwrap();
+    let im = image::open("images/Game3.png").unwrap();
     let gs = read_board(&im);
     gs.print();
+}
+
+pub fn mousetest(){
+    let mut enigo = Enigo::new();
+    for i in (0..5).rev(){
+        println!("{}..", i);
+        thread::sleep(time::Duration::new(1, 0));
+    }
+
+    for x in 0..11{
+        for y in 0..11{
+            if game::GameState::on_board(x, y){
+                click_peice(x, y, &mut enigo);
+                // thread::sleep(time::Duration::from_millis(500));
+            }
+        }
+    }
 }
 
 pub fn oldtest(){
