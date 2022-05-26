@@ -7,23 +7,6 @@ use image::RgbaImage;
 use image::DynamicImage;
 
 
-
-
-
-pub fn test(){
-    for i in (0..5).rev(){
-        println!("{}..", i);
-        thread::sleep(time::Duration::new(1, 0));
-    }
-
-    let im = get_screen_image();
-    match im.save("images/screenshot_test.png"){
-        Ok(_) => println!("screenshot taken!"),
-        Err(_) => println!("screenshot failed to save!"),
-    };
-
-}
-
 pub fn get_screen_image() -> DynamicImage{
     let (w, h, captured_buff) = get_screen_frame();
     let captured_image_buff: RgbaImage =
@@ -39,7 +22,7 @@ pub fn get_screen_frame() -> (usize, usize, Vec<u8>){
     let mut maincap = Capturer::new(maindisp).expect("Could not initialize Capturer.");
     let (w, h) = (maincap.width(), maincap.height());
 
-    println!("primary display has dimensions: {} x {}", w, h);
+    // println!("primary display has dimensions: {} x {}", w, h);
 
     let screen_frame = loop {
         let buffer = match maincap.frame() {
@@ -72,4 +55,18 @@ pub fn get_screen_frame() -> (usize, usize, Vec<u8>){
     }
 
     (w, h, rearranged)
+}
+
+pub fn test(){
+    for i in (0..5).rev(){
+        println!("{}..", i);
+        thread::sleep(time::Duration::new(1, 0));
+    }
+
+    let im = get_screen_image();
+    match im.save("images/screenshot_test.png"){
+        Ok(_) => println!("screenshot taken!"),
+        Err(_) => println!("screenshot failed to save!"),
+    };
+
 }
