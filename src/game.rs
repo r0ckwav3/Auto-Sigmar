@@ -187,7 +187,7 @@ impl GameState{
     // solves in place, but should return the board to its original state by the end of execution
     pub fn solve(&mut self) -> Option<Vec<[usize; 4]>>{
         if self.is_solved() {
-            Some(Vec::new())
+            Some(Vec::from([[5, 5, 5, 5]]))
         }else{
              let open_pieces = self.open_pieces();
              let mut loopresult = None;

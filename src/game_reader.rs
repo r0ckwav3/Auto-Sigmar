@@ -139,6 +139,29 @@ pub fn read_board(im: &DynamicImage) -> game::GameState{
     gs
 }
 
+pub fn perform_solution(solution: &Vec<[usize; 4]>){
+    let mouse_manager = Mouse::new();
+    let clickdelay = time::Duration::from_millis(5);
+
+    for action in solution{
+        let (x, y) = get_screen_coords_center(action[0], action[1]);
+        mouse_manager.move_to(x as usize, y as usize)
+            .expect(&format!("Attempted to move to ({}, {}) -> ({}, {})",
+                action[0], action[1], x, y)[..]);
+        thread::sleep(clickdelay);
+        mouse_manager.click_button(&MouseButton::Left).expect("Attempted to click");
+        thread::sleep(clickdelay);
+
+        let (x, y) = get_screen_coords_center(action[2], action[3]);
+        mouse_manager.move_to(x as usize, y as usize)
+            .expect(&format!("Attempted to move to ({}, {}) -> ({}, {})",
+                action[2], action[3], x, y)[..]);
+        thread::sleep(clickdelay);
+        mouse_manager.click_button(&MouseButton::Left).expect("Attempted to click");
+        thread::sleep(clickdelay);
+    }
+}
+
 pub fn test(){
     let im = image::open("images/Game3.png").unwrap();
     let gs = read_board(&im);
