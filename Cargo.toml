@@ -6,6 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-enigo = "0.0.14"
+mouce = "0.2.1"
 scrap = "0.5.0"
 image = "0.23.14"
