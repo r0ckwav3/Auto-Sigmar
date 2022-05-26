@@ -141,7 +141,7 @@ pub fn read_board(im: &DynamicImage) -> game::GameState{
 
 pub fn perform_solution(solution: &Vec<[usize; 4]>){
     let mouse_manager = Mouse::new();
-    let clickdelay = time::Duration::from_millis(5);
+    let clickdelay = time::Duration::from_millis(500);
 
     for action in solution{
         let (x, y) = get_screen_coords_center(action[0], action[1]);
@@ -180,7 +180,10 @@ pub fn mousetest(){
             if game::GameState::on_board(xi, yi){
                 let (x, y) = get_screen_coords_center(xi, yi);
                 mouse_manager.move_to(x as usize, y as usize).expect("Attempted move");
-                thread::sleep(time::Duration::from_millis(500));
+                mouse_manager.move_relative(1, 1).expect("Attempted move 2");
+                thread::sleep(time::Duration::from_millis(100));
+                mouse_manager.click_button(&MouseButton::Left).expect("Attempted to click");
+                thread::sleep(time::Duration::from_millis(100));
             }
         }
     }
